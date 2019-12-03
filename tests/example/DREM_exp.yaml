@@ -1,0 +1,31 @@
+arch:
+ input_feed: "product_embedding_zoo.input_feed.DREMInputFeed"
+ learning_algorithm: "product_embedding_zoo.learning_algorithm.DREM"
+ dataset_type: "product_embedding_zoo.dataset.DREMDataset"
+data:
+  data_dir: "amazon_cellphone_index_dataset/seq_min_count5/"
+  input_train_dir: "amazon_cellphone_index_dataset/seq_min_count5/seq_query_split/"
+  model_dir: "./drem_tmp/"
+  logging_dir: "./drem_log/"
+
+experiment:
+  subsampling_rate: 0.0001
+  max_train_epoch: 20
+  steps_per_checkpoint: 200
+  seconds_per_checkpoint: 3600
+  decode: false
+  test_mode: "product_scores"
+  rank_cutoff: 100
+
+hparams:
+ window_size: 5
+ embed_size: 300
+ max_gradient_norm: 5.0
+ init_learning_rate: 0.5
+ L2_lambda: 0.005
+ query_weight: 0.5
+ dynamic_weight: 0.5
+ net_struct: "simplified_fs"
+ similarity_func: "bias_product"
+ negative_sample: 5
+ batch_size: 384
