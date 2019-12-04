@@ -1,2 +1,7 @@
-# igonre all .pyc files
+# igonre all .pyc, .sh  files
 *.pyc
+*.sh
+# ignore *_log file and *_tmp
+*_log/
+*_tmp/
+

@@ -3,8 +3,8 @@ arch:
  learning_algorithm: "product_embedding_zoo.learning_algorithm.DREM"
  dataset_type: "product_embedding_zoo.dataset.DREMDataset"
 data:
-  data_dir: "amazon_cellphone_index_dataset/seq_min_count5/"
-  input_train_dir: "amazon_cellphone_index_dataset/seq_min_count5/seq_query_split/"
+  data_dir: "../amazon_cellphone_index_dataset/cell_phone/" #seq_min_count5/"
+  input_train_dir: "../amazon_cellphone_index_dataset/cell_phone/random_query_split/"
   model_dir: "./drem_tmp/"
   logging_dir: "./drem_log/"
 

@@ -3,8 +3,8 @@ arch:
   learning_algorithm: "product_embedding_zoo.learning_algorithm.HEM"
   dataset_type: "product_embedding_zoo.dataset.HEMDataset"
 data:
-  data_dir: "./seq_tmp_data/min_count5/" #"amazon_cellphone_index_dataset/seq_min_count5/"
-  input_train_dir: "./seq_tmp_data/min_count5/seq_query_split/" #"amazon_cellphone_index_dataset/seq_min_count5/seq_query_split/"
+  data_dir: "../amazon_cellphone_index_dataset/cell_phone/" #"../seq_tmp_data/min_count5/" #"amazon_cellphone_index_dataset/seq_min_count5/"
+  input_train_dir: "../amazon_cellphone_index_dataset/cell_phone/random_query_split/"  #"amazon_cellphone_index_dataset/seq_min_count5/seq_query_split/"
   model_dir: "./hem_tmp/"
   logging_dir: "./hem_log/"
 

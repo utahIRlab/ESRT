@@ -5,4 +5,4 @@ cd ..
 #change the name of log file
 #mv "./log/" "./log_$( date +%H:%M:%d-%m)/”
 
-python -m tests.main_v2 --setting_file="./tests/example/DREM_exp.yaml"
+python main.py --setting_file="./tests/example/DREM_exp.yaml"
