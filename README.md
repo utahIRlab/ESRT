@@ -1,3 +1,17 @@
+# Overview
+This is a collecetion of implements of following models:
+* [HEM] Qingyao Ai, Yongfeng Zhang, Keping Bi, Xu Chen, W. Bruce Croft. 2017. Learning a Hierarchical Embedding Model for Personalized ProductSearch. In Proceedings of SIGIR ’17
+* [AEM] Qingyao Ai, Daniel Hill, Vishy Vishwanathan and W. Bruce Croft. A Zero Attention Model for Personalized Product Search. Accepted in Proceedings of the 28th ACM International Conference on Information and Knowledge Management (CIKM’19) 
+* [DREM] Qingyao Ai, Yongfeng Zhang, Keping Bi, W. Bruce Croft. Explainable Product Search with a Dynamic Relation Embedding Model. ACM Transactions on Information Systems (TOIS). 2019
+
+These models are deep neural network models that jointly learn latent representations for queries, products and users and knowledge entites(DREM). 
+They are designed as generative models and the embedding representations for queries, users and items in the models are learned through optimizing the log likelihood of observed user-query-item purchases. 
+The probability (which is also the rank score) of an item being purchased by a user with a query can be computed with their corresponding latent representations. 
+Please refer to the paper for more details.
+### Requirements: ###
+    1. To run the models, python 2.7+ and Tensorflow v1.0+ are needed. (In the paper, we used python 2.7.12 and Tensorflow v2.0.0)
+    2. To run the jar package in ./seq_utils/AmazonDataset/jar/, JDK 1.7 is needed
+
 ### Run Models ###
 **Data preparation**
 ```
