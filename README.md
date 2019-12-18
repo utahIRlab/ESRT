@@ -20,7 +20,7 @@ bash data_preprocess.sh
 ```
 **Train model**
 ``` 
-bash hem_run.sh # hem model
+bash hem_run.sh # run hem model
 # or
 bash aem_run.sh # run aem model
 # or
@@ -28,7 +28,7 @@ bash drem_run.sh # run drem model
 ```
 **Test model**
 ``` 
-bash hem_test.sh # hem model
+bash hem_test.sh # run hem model
 # or
 bash aem_test.sh # run aem model
 # or
@@ -36,7 +36,7 @@ bash drem_test.sh # run drem model
 ```
 **Evaluate model**
 ``` 
-bash hem_metric.sh # hem model
+bash hem_metric.sh # run hem model
 # or
 bash aem_metric.sh # run aem model
 # or
@@ -64,7 +64,7 @@ bash drem_metric.sh # run drem model
 |attention_func||'default'||
 |max_history_length||10||
 
-### Evaluation
+### Result
 |Models |MRR |NCDG10|P10|
 |---:|:---:|:---:|:---:|
 | HEM | 0.073|0.083|0.016| 
