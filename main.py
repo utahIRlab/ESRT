@@ -26,37 +26,6 @@ import product_embedding_zoo as pez
 from product_embedding_zoo.utils.param import Param
 
 
-#tf.app.flags.DEFINE_float("learning_rate", 0.5, "Learning rate.")
-#tf.app.flags.DEFINE_float("learning_rate_decay_factor", 0.90,
-#                            "Learning rate decays by this much.")
-#tf.app.flags.DEFINE_float("max_gradient_norm", 5.0,
-#                            "Clip gradients to this norm.")
-#tf.app.flags.DEFINE_float("subsampling_rate", 1e-4,
-#                            "The rate to subsampling.")
-#tf.app.flags.DEFINE_float("L2_lambda", 0.0,
-#                            "The lambda for L2 regularization.")
-#tf.app.flags.DEFINE_float("query_weight", 0.5,
-#                            "The weight for query.")
-#tf.app.flags.DEFINE_float("dynamic_weight", 0.5, "The weight for the dynamic relationship [0.0, 1.0].")
-#tf.app.flags.DEFINE_integer("batch_size", 8,
-#                            "Batch size to use during training.")
-#rank list size should be read from data
-#tf.app.flags.DEFINE_string("data_dir", "/tmp", "Data directory")
-#tf.app.flags.DEFINE_string("input_train_dir", "", "The directory of training and testing data")
-#tf.app.flags.DEFINE_string("train_dir", "./tmp/", "Model directory & output directory")
-#tf.app.flags.DEFINE_string("logging_dir", ".log/", "Log directory")
-#tf.app.flags.DEFINE_string("similarity_func", "product", "Select similarity function, which could be product, cosine and bias_product")
-#tf.app.flags.DEFINE_string("net_struct", "simplified_fs", "Specify network structure parameters. Please read readme.txt for details.")
-#tf.app.flags.DEFINE_integer("embed_size", 100, "Size of each embedding.")
-#tf.app.flags.DEFINE_integer("window_size", 5, "Size of context window.")
-#tf.app.flags.DEFINE_integer("max_train_epoch", 5,
-#                            "Limit on the epochs of training (0: no limit).")
-#tf.app.flags.DEFINE_integer("steps_per_checkpoint", 200,
-#                            "How many training steps to do per checkpoint.")
-#tf.app.flags.DEFINE_integer("seconds_per_checkpoint", 3600,
-#                            "How many seconds to wait before storing embeddings.")
-#tf.app.flags.DEFINE_integer("negative_sample", 5,
-#                            "How many samples to generate for negative sampling.")
 tf.app.flags.DEFINE_boolean("decode", False,
                             "Set to True for testing.")
 tf.app.flags.DEFINE_string("test_mode", "product_scores", "Test modes: product_scores -> output ranking results and ranking scores; output_embedding -> output embedding representations for users, items and words. (default is product_scores)")
@@ -67,20 +36,6 @@ tf.app.flags.DEFINE_string("setting_file", "./example/exp1.yaml", "a yaml contai
 
 
 FLAGS = tf.app.flags.FLAGS
-"""
-HPARAMS_DICT = {
-    "window_size":FLAGS.window_size,
-    "embed_size":FLAGS.embed_size,
-    "max_gradient_norm":FLAGS.max_gradient_norm,
-    "init_learning_rate": FLAGS.learning_rate,
-    "L2_lambda": FLAGS.L2_lambda,
-    "query_weight":FLAGS.query_weight,
-    "dynamic_weight": FLAGS.dynamic_weight,
-    "net_struct": FLAGS.net_struct,
-    "similarity_func": FLAGS.similarity_func,
-    "negative_sample": FLAGS.negative_sample
-}
-"""
 
 def create_model(session, model_name, hparams, forward_only, data_set, model_dir):
     """Create translation model and initialize or load parameters in session."""

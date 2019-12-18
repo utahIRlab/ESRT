@@ -1,7 +1,12 @@
-# igonre all .pyc, .sh  files
+# igonre all .pyc, .sh, .swp  files
 *.pyc
-*.sh
+#*.sh
+*.swp
 # ignore *_log file and *_tmp
 *_log/
 *_tmp/
+
+# ignore dataset
+amazon_cellphone_index_dataset/
+
 
