@@ -1,5 +1,5 @@
 # Overview
-This is a collecetion of implements of following models:
+This is a collecetion of implements of following models, but it still under development:
 * [HEM] Qingyao Ai, Yongfeng Zhang, Keping Bi, Xu Chen, W. Bruce Croft. 2017. Learning a Hierarchical Embedding Model for Personalized ProductSearch. In Proceedings of SIGIR ’17
 * [AEM] Qingyao Ai, Daniel Hill, Vishy Vishwanathan and W. Bruce Croft. A Zero Attention Model for Personalized Product Search. Accepted in Proceedings of the 28th ACM International Conference on Information and Knowledge Management (CIKM’19) 
 * [DREM] Qingyao Ai, Yongfeng Zhang, Keping Bi, W. Bruce Croft. Explainable Product Search with a Dynamic Relation Embedding Model. ACM Transactions on Information Systems (TOIS). 2019
