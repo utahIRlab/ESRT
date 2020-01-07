@@ -32,9 +32,8 @@ def get_product_scores(model, user_idxs, query_word_idx, product_idxs = None, sc
 		user_vec = tf.nn.embedding_lookup(model.user_emb, user_idxs)
 		# get query embedding [None, embed_size]
 		query_vec, query_embs = get_query_embedding(model, query_word_idx, True)
-                
-                model.print_ops.append(tf.print("user_vec", user_vec))
-                model.print_ops.append(tf.print("query_vec", query_vec))
+		model.print_ops.append(tf.print("user_vec", user_vec))
+		model.print_ops.append(tf.print("query_vec", query_vec))
 
 		# get candidate product embedding [None, embed_size]
 		product_vec = None
@@ -47,7 +46,7 @@ def get_product_scores(model, user_idxs, query_word_idx, product_idxs = None, sc
 			product_bias = model.product_bias
 
 		print('Similarity Function : ' + model.similarity_func)
-                model.print_ops.append(tf.print("product vec", product_vec))
+		model.print_ops.append(tf.print("product vec", product_vec))
 
 		if model.similarity_func == 'product':
 			return tf.matmul((1.0 - model.Wu) * user_vec + model.Wu * query_vec, product_vec, transpose_b=True)

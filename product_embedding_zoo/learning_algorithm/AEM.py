@@ -131,6 +131,7 @@ class AEM():
         self.product_idxs = tf.placeholder(tf.int64, shape=[None], name="product_idxs")
         self.history_product_idxs = tf.placeholder(tf.int64, shape=[None, self.max_history_length],
                                                  name="history_product_idxs")
+        self.input_history_length = tf.placeholder(tf.int64, shape=[None], name="history_length")
         self.word_idxs = tf.placeholder(tf.int64, shape=[None], name="word_idxs")
         self.query_word_idxs = tf.placeholder(tf.int64, shape=[None, self.query_max_length], name="query_word_idxs")
         self.PAD_embed = tf.get_variable("PAD_embed", [1,self.embed_size],dtype=tf.float32)

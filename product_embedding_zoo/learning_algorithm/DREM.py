@@ -52,7 +52,7 @@ class DREM(object):
 			negative_sample: the number of negative_samples for training
 		"""
 		self.data_set = data_set
-                self.hparams = hparams
+		self.hparams = hparams
 		self.negative_sample = self.hparams.negative_sample
 		self.embed_size = self.hparams.embed_size
 		self.window_size = self.hparams.window_size
@@ -60,10 +60,10 @@ class DREM(object):
 		#self.batch_size = batch_size * (self.negative_sample + 1)
 		self.init_learning_rate = self.hparams.init_learning_rate
 		self.L2_lambda = self.hparams.L2_lambda
-                self.net_struct = self.hparams.net_struct
-                self.similarity_func = self.hparams.similarity_func
+		self.net_struct = self.hparams.net_struct
+		self.similarity_func = self.hparams.similarity_func
 		self.dynamic_weight = self.hparams.dynamic_weight
-                self.query_weight= self.hparams.query_weight
+		self.query_weight= self.hparams.query_weight
 		self.global_step = tf.Variable(0, trainable=False)
 		if self.query_weight >= 0:
 			self.Wu = tf.Variable(self.query_weight, name="user_weight", dtype=tf.float32, trainable=False)
@@ -74,7 +74,7 @@ class DREM(object):
 		self.learning_rate = tf.placeholder(tf.float32, name="learning_rate")
 		init_width = 0.5 / self.embed_size
 
-                logging.info(
+		logging.info(
                     """
                         negative_sample: %d 
                         embed_size: %d
@@ -237,10 +237,9 @@ class DREM(object):
 			self.pic_scores, pic_vec = DREM_builder.get_relation_scores(self, 0.5, p_vec, 'categories', 'categories')
 			'''
 			
-	
-                tf.summary.scalar('Learning_rate', self.learning_rate, collections=['train'])
-                tf.summary.scalar('Loss', self.loss, collections=['train'])
-                self.train_summary = tf.summary.merge_all(key='train')
+			tf.summary.scalar('Learning_rate', self.learning_rate, collections=['train'])
+			tf.summary.scalar('Loss', self.loss, collections=['train'])
+			self.train_summary = tf.summary.merge_all(key='train')
 		self.saver = tf.train.Saver(tf.global_variables())
 	
 	def step(self, session, input_feed, forward_only, file_writer=None, test_mode = 'product_scores'):

@@ -29,6 +29,7 @@ class AEMInputFeed(object):
         user_idxs, product_idxs, review_idxs, word_idxs, context_word_idxs = [],[],[],[],[]
         query_word_idxs = []
         history_product_idxs = []
+        input_history_length = []
         learning_rate = self.model.init_learning_rate * max(0.0001,
                                     1.0 - self.finished_word_num / self.words_to_train)
         review_idx = self.train_seq[self.cur_review_i]
@@ -43,8 +44,9 @@ class AEMInputFeed(object):
             if self.data_set.sub_sampling_rate == None or random.random() < self.data_set.sub_sampling_rate[text_list[self.cur_word_i]]:
                 user_idxs.append(user_idx)
                 product_idxs.append(product_idx)
-                history_product_idxs.append(self.model.dataset.get_history_products(user_idx, product_idx,
-                                            self.model.max_history_length))
+                product_history_idxs, history_length = self.model.dataset.get_history_products(user_idx, product_idx, self.model.max_history_length)
+                history_product_idxs.append(product_history_idxs)
+                input_history_length.append(history_length)
                 query_word_idxs.append(self.data_set.query_words[query_idx])
                 review_idxs.append(review_idx)
                 word_idxs.append(text_list[self.cur_word_i])
@@ -87,6 +89,7 @@ class AEMInputFeed(object):
         input_feed[self.model.user_idxs.name] = user_idxs
         input_feed[self.model.product_idxs.name] = product_idxs
         input_feed[self.model.history_product_idxs] = history_product_idxs
+        input_feed[self.model.input_history_length.name] = input_history_length
         input_feed[self.model.query_word_idxs.name] = query_word_idxs
         input_feed[self.model.review_idxs.name] = review_idxs
         input_feed[self.model.word_idxs.name] = word_idxs
@@ -130,6 +133,7 @@ class AEMInputFeed(object):
         user_idxs, product_idxs, review_idxs, word_idxs, context_word_idxs = [],[],[],[],[]
         query_word_idxs = []
         history_product_idxs = []
+        input_history_length = []
         learning_rate = self.model.init_learning_rate * max(0.0001,
                                     1.0 - self.finished_word_num / self.words_to_train)
         start_i = self.cur_uqr_i
@@ -139,7 +143,9 @@ class AEMInputFeed(object):
             text_list = self.data_set.review_text[review_idx]
             user_idxs.append(user_idx)
             product_idxs.append(product_idx)
-            history_product_idxs.append(self.model.dataset.get_history_products(user_idx, product_idx, self.model.max_history_length))
+            product_history_idxs, history_length = self.model.dataset.get_history_products(user_idx, product_idx, self.model.max_history_length)
+            history_product_idxs.append(product_history_idxs)
+            input_history_length.append(history_length)
             query_word_idxs.append(self.data_set.query_words[query_idx])
             review_idxs.append(review_idx)
             word_idxs.append(text_list[0])
@@ -172,6 +178,7 @@ class AEMInputFeed(object):
         input_feed[self.model.user_idxs.name] = user_idxs
         input_feed[self.model.product_idxs.name] = product_idxs
         input_feed[self.model.history_product_idxs.name] = history_product_idxs
+        input_feed[self.model.input_history_length.name] = input_history_length
         input_feed[self.model.query_word_idxs.name] = query_word_idxs
         input_feed[self.model.review_idxs.name] = review_idxs
         input_feed[self.model.word_idxs.name] = word_idxs

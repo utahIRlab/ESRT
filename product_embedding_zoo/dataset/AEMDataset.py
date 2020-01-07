@@ -3,38 +3,38 @@ import json
 import random
 import gzip
 import math
-from six.moves import xrange
+from six.moves import range
 import os
 
 class AEMDataset:
     def __init__(self, data_path, input_train_dir, set_name):
         #get product/user/vocabulary information
         self.product_ids = []
-        with gzip.open(data_path + 'product.txt.gz', 'r') as fin:
+        with gzip.open(data_path + 'product.txt.gz', 'rt') as fin:
             for line in fin:
                 self.product_ids.append(line.strip())
         self.product_size = len(self.product_ids)
         self.user_ids = []
-        with gzip.open(data_path + 'users.txt.gz', 'r') as fin:
+        with gzip.open(data_path + 'users.txt.gz', 'rt') as fin:
             for line in fin:
                 self.user_ids.append(line.strip())
         self.user_size = len(self.user_ids)
         self.words = []
-        with gzip.open(data_path + 'vocab.txt.gz', 'r') as fin:
+        with gzip.open(data_path + 'vocab.txt.gz', 'rt') as fin:
             for line in fin:
                 self.words.append(line.strip())
         self.vocab_size = len(self.words)
         self.query_words = []
         self.query_max_length = 0
-        with gzip.open(input_train_dir + 'query.txt.gz', 'r') as fin:
+        with gzip.open(input_train_dir + 'query.txt.gz', 'rt') as fin:
             for line in fin:
                 words = [int(i) for i in line.strip().split(' ')]
                 if len(words) > self.query_max_length:
                     self.query_max_length = len(words)
                 self.query_words.append(words)
         #pad
-        for i in xrange(len(self.query_words)):
-            self.query_words[i] = [self.vocab_size for j in xrange(self.query_max_length-len(self.query_words[i]))] + self.query_words[i]
+        for i in range(len(self.query_words)):
+            self.query_words[i] = [self.vocab_size for j in range(self.query_max_length-len(self.query_words[i]))] + self.query_words[i]
 
 
         #get review sets
@@ -42,7 +42,7 @@ class AEMDataset:
         self.vocab_distribute = np.zeros(self.vocab_size)
         self.review_info = []
         self.review_text = []
-        with gzip.open(input_train_dir + set_name + '.txt.gz', 'r') as fin:
+        with gzip.open(input_train_dir + set_name + '.txt.gz', 'rt') as fin:
             for line in fin:
                 arr = line.strip().split('\t')
                 self.review_info.append((int(arr[0]), int(arr[1]))) # (user_idx, product_idx)
@@ -61,7 +61,7 @@ class AEMDataset:
             print(rf)
         #get product query sets
         self.product_query_idx = []
-        with gzip.open(input_train_dir + set_name + '_query_idx.txt.gz', 'r') as fin:
+        with gzip.open(input_train_dir + set_name + '_query_idx.txt.gz', 'rt') as fin:
             for line in fin:
                 arr = line.strip().split(' ')
                 query_idx = []
@@ -74,14 +74,14 @@ class AEMDataset:
         # get the user review and user product set
         self.user_review_idxs = []
         self.user_product_idxs = []
-        with gzip.open(os.path.join(data_path, "u_r_seq.txt.gz"), 'r') as fin:
+        with gzip.open(os.path.join(data_path, "u_r_seq.txt.gz"), 'rt') as fin:
             for line in fin:
                 reviews = [int(_) for _ in line.rstrip().split(" ")]
                 self.user_review_idxs.append(reviews)
                 self.user_product_idxs.append([-1 for _ in range(len( self.user_review_idxs[-1]))])
 
         # get user product idx data
-        with gzip.open(os.path.join(data_path, "review_u_p.txt.gz")) as fin:
+        with gzip.open(os.path.join(data_path, "review_u_p.txt.gz"), 'rt') as fin:
             review_idx = 0
             for line in fin:
                 user_idx, product_idx = int(line.rstrip().split(" ")[0]), int(line.rstrip().split(" ")[1])
@@ -104,26 +104,27 @@ class AEMDataset:
     def get_history_products(self, user_idx, product_idx, max_length = None):
         pos = self.user_product_idxs[user_idx].index(product_idx)
         product_history_idxs = self.user_product_idxs[user_idx][max(0, pos-max_length):pos]
+        history_length = len(product_history_idxs)
         if max_length != None:
             product_history_idxs += [self.product_size for _ in range(max_length - len(product_history_idxs))]
-        return product_history_idxs
+        return product_history_idxs, history_length
 
     def sub_sampling(self, subsample_threshold):
         if subsample_threshold == 0.0:
             return
-        self.sub_sampling_rate = [1.0 for _ in xrange(self.vocab_size)]
+        self.sub_sampling_rate = [1.0 for _ in range(self.vocab_size)]
         threshold = sum(self.vocab_distribute) * subsample_threshold
         count_sub_sample = 0
-        for i in xrange(self.vocab_size):
+        for i in range(self.vocab_size):
             #vocab_distribute[i] could be zero if the word does not appear in the training set
             self.sub_sampling_rate[i] = min((np.sqrt(float(self.vocab_distribute[i]) / threshold) + 1) * threshold / float(self.vocab_distribute[i]),
                                             1.0)
             count_sub_sample += 1
 
     def read_train_product_ids(self, data_path):
-        self.user_train_product_set_list = [set() for i in xrange(self.user_size)]
+        self.user_train_product_set_list = [set() for i in range(self.user_size)]
         self.train_review_size = 0
-        with gzip.open(data_path + 'train.txt.gz', 'r') as fin:
+        with gzip.open(data_path + 'train.txt.gz', 'rt') as fin:
             for line in fin:
                 self.train_review_size += 1
                 arr = line.strip().split('\t')
@@ -151,7 +152,7 @@ class AEMDataset:
         with open(output_path + 'test.'+similarity_func+'.ranklist', 'w') as rank_fout:
             for uq_pair in user_ranklist_map:
                 user_id = self.user_ids[uq_pair[0]]
-                for i in xrange(len(user_ranklist_map[uq_pair])):
+                for i in range(len(user_ranklist_map[uq_pair])):
                     #print(i, len(user_ranklist_map[uq_pair]))
                     #print("product_id: ", user_ranklist_map[uq_pair][i], len(self.product_ids))
                     product_id = self.product_ids[user_ranklist_map[uq_pair][i]]
@@ -169,8 +170,8 @@ class AEMDataset:
                 dimensions = len(embeddings[0])
                 emb_fout.write(str(length) + '\n')
                 emb_fout.write(str(dimensions) + '\n')
-                for i in xrange(length):
-                    for j in xrange(dimensions):
+                for i in range(length):
+                    for j in range(dimensions):
                         emb_fout.write(str(embeddings[i][j]) + ' ')
                     emb_fout.write('\n')
             except:

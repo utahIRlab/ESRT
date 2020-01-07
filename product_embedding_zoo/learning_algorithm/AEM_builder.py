@@ -249,7 +249,7 @@ def get_user_vec(model, query_vec, reuse=False, scope=None):
     if model.hparams.user_struct == 'asin_mean':
         history_length = model.input_history_length
         mask = tf.expand_dims(tf.sequence_mask(history_length, maxlen=model.hparams.max_history_length, dtype=DATA_TYPE), -1)
-        asin_idxs_list = model.history_asin_idxs
+        asin_idxs_list = model.history_product_idxs
         asin_vecs, r_terms = get_asin_vec(model, asin_idxs_list, True)
         regularization_terms.extend(r_terms)
         div = tf.to_float(tf.expand_dims(history_length, -1))
@@ -257,7 +257,7 @@ def get_user_vec(model, query_vec, reuse=False, scope=None):
     elif model.hparams.user_struct == 'asin_zero_mean':
         history_length = model.input_history_length
         mask = tf.expand_dims(tf.sequence_mask(history_length, maxlen=model.hparams.max_history_length, dtype=DATA_TYPE), -1)
-        asin_idxs_list = model.history_asin_idxs
+        asin_idxs_list = model.history_product_idxs
         asin_vecs, r_terms = get_asin_vec(model, asin_idxs_list, True)
         regularization_terms.extend(r_terms)
         div = tf.to_float(tf.expand_dims(history_length, -1))
@@ -265,7 +265,7 @@ def get_user_vec(model, query_vec, reuse=False, scope=None):
         user_vec = compute_attention_vec(query_vec, tf.expand_dims(mean_vec, 1), tf.ones_like(history_length), True)
 
     elif model.hparams.user_struct == 'asin_attention':
-        history_length = model.max_history_length
+        history_length = model.input_history_length
         asin_idxs_list = model.history_product_idxs
         #model.print_ops.append(tf.print("history_length: ", model.max_history_length))
         #model.print_ops.append(tf.print("asin_idxs_list: ", model.history_product_idxs))
@@ -277,7 +277,7 @@ def get_user_vec(model, query_vec, reuse=False, scope=None):
 
     elif model.hparams.user_struct == 'asin_zero_attention':
         history_length = model.input_history_length
-        asin_idxs_list = model.history_asin_idxs
+        asin_idxs_list = model.history_product_idxs
         with variable_scope.variable_scope(scope or 'history_attention', reuse=reuse):
             asin_vecs, r_terms = get_asin_vec(model, asin_idxs_list, True)
             regularization_terms.extend(r_terms)
@@ -332,7 +332,7 @@ def get_user_vec(model, query_vec, reuse=False, scope=None):
         div = tf.to_float(tf.expand_dims(history_length, -1))
         mask = tf.expand_dims(
             tf.sequence_mask(history_length, maxlen=model.hparams.max_history_length, dtype=DATA_TYPE), -1)
-        asin_idxs_list = model.history_asin_idxs
+        asin_idxs_list = model.history_product_idxs
         query_idxs_list = model.history_query_idxs
         asin_vecs, r_terms = get_asin_vec(model, asin_idxs_list, True)
         regularization_terms.extend(r_terms)
@@ -352,7 +352,7 @@ def get_user_vec(model, query_vec, reuse=False, scope=None):
             1)
 
     elif model.hparams.user_struct == 'none':
-        asin_idxs_list = model.model.history_asin_idxs
+        asin_idxs_list = model.model.history_product_idxs
         asin_vecs, r_terms = get_asin_vec(model, asin_idxs_list, True)
         user_vec = tf.zeros_like(tf.reduce_sum(asin_vecs, 1))
 
