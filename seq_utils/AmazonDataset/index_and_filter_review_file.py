@@ -4,7 +4,7 @@ import gzip, operator
 review_file = sys.argv[1]
 output_path = sys.argv[2]
 min_count = int(sys.argv[3])
-output_path += 'min_count' + str(min_count) + '/'
+output_path += 'seq_min_count' + str(min_count) + '/'
 if not os.path.exists(output_path):
 	os.makedirs(output_path)
 

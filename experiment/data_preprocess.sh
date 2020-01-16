@@ -6,7 +6,7 @@ cd ../
 #wget http://snap.stanford.edu/data/amazon/productGraph/categoryFiles/meta_Cell_Phones_and_Accessories.json.gz
 
 # Stem and remove stop words from the Amazon review datasets if needed. Here, we stem the field of “reviewText” and “summary” without stop words removal.
-java -Xmx4g -jar ./seq_utils/AmazonDataset/jar/AmazonReviewData_preprocess.jar false ./reviews_Cell_Phones_and_Accessories_5.json.gz ./reviews_Cell_Phones_and_Accessories_5.processed.gz
+#java -Xmx4g -jar ./seq_utils/AmazonDataset/jar/AmazonReviewData_preprocess.jar false ./reviews_Cell_Phones_and_Accessories_5.json.gz ./reviews_Cell_Phones_and_Accessories_5.processed.gz
 
 # Index datasets
 python ./seq_utils/AmazonDataset/index_and_filter_review_file.py reviews_Cell_Phones_and_Accessories_5.processed.gz ./amazon_cellphone_index_dataset/ 5

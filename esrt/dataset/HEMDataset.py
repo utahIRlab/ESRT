@@ -92,6 +92,17 @@ class HEMDataset:
 
 
 	def compute_test_product_ranklist(self, u_idx, original_scores, sorted_product_idxs, rank_cutoff):
+		"""
+		Args:
+			u_idx: User idx with type of int32.
+			original_scores: Tensor with shape of [product_size] with type of float32
+			sorted_product_idxs: Sorted version of @original_scores
+			rank_cutoff: int32.
+
+		Return:
+			product_rank_list: List with shape of [rank_cutoff] with type of int32.
+			product_rank_scores: List with shape of [rank_cutoff] with tyoe of float32.
+		"""
 		product_rank_list = []
 		product_rank_scores = []
 		rank = 0
@@ -106,6 +117,16 @@ class HEMDataset:
 		return product_rank_list, product_rank_scores
 
 	def output_ranklist(self, user_ranklist_map, user_ranklist_score_map, output_path, similarity_func, debug=False):
+		"""
+		Args:
+			user_ranklist_map: Dict. its key is (user_idx, query_idx) tuple with type of (int32, int32),
+							   its value is list with shape of [rank_cutoff] with type of int32.
+			user_ranklist_score_map:Dict. its key is (user_idx, query_idx) tuple with type of (int32, int32),
+							   its value is list with shape of List with shape of [rank_cutoff] with type of float32.
+			output_path: str
+			similarity_func: str
+
+		"""
 		with open(output_path + 'test.'+similarity_func+'.ranklist', 'w') as rank_fout:
 			for uq_pair in user_ranklist_map:
 				user_id = self.user_ids[uq_pair[0]]

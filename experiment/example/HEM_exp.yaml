@@ -1,7 +1,7 @@
 arch:
-  input_feed: "product_embedding_zoo.input_feed.HEMInputFeed"
-  learning_algorithm: "product_embedding_zoo.learning_algorithm.HEM"
-  dataset_type: "product_embedding_zoo.dataset.HEMDataset"
+  input_feed: "esrt.input_feed.HEMInputFeed"
+  learning_algorithm: "esrt.models.HEM"
+  dataset_type: "esrt.dataset.HEMDataset"
 data:
   data_dir: "./amazon_cellphone_index_dataset/seq_min_count5/" #"../seq_tmp_data/min_count5/" #"amazon_cellphone_index_dataset/seq_min_count5/"
   input_train_dir: "./amazon_cellphone_index_dataset/seq_min_count5/seq_query_split/"  #"amazon_cellphone_index_dataset/seq_min_count5/seq_query_split/"
@@ -24,7 +24,7 @@ hparams:
   init_learning_rate: 0.5
   L2_lambda: 0.005
   query_weight: 0.5
-  negative_sample: 5  
+  negative_sample: 5
   net_struct: "simplified_fs"
   similarity_func: "bias_product"
   batch_size: 384

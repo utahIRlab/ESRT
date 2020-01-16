@@ -8,7 +8,7 @@ import logging
 # package import
 from . import HEM_builder
 from . import LSE
-import product_embedding_zoo as pez
+
 
 class HEM():
     def __init__(self, dataset, hparams, forward_only=False):
@@ -23,27 +23,11 @@ class HEM():
         self.review_distribute = self.dataset.review_distribute
         self.product_distribute = self.dataset.product_distribute
 
-        # hparams setting
-        """
-        self.hparams = tf.HParams(
-            embed_size=300,
-            window_size=3,
-            max_gradient_norm=5.0,
-            init_learning_rate=0.5,
-            L2_lambda=0.005,
-            net_struct="simplified_fs",
-            similarity_func="bias_product",
-            query_weight=0.5,
-            negative_sample=5
-        )
-        self.hparams.override_from_dict(hparams_dict)
-        """
         self.hparams = hparams
         self.negative_sample = self.hparams.negative_sample
         self.embed_size = self.hparams.embed_size
         self.window_size = self.hparams.window_size
         self.max_gradient_norm = self.hparams.max_gradient_norm
-        #self.batch_size = batch_size * (self.negative_sample + 1)
         self.init_learning_rate = self.hparams.init_learning_rate
         self.L2_lambda = self.hparams.L2_lambda
         self.net_struct = self.hparams.net_struct
@@ -55,29 +39,6 @@ class HEM():
             self.Wu = tf.Variable(self.query_weight, name="user_weight", dtype=tf.float32, trainable=False)
         else:
             self.Wu = tf.sigmoid(tf.Variable(0, name="user_weight", dtype=tf.float32))
-
-        # hparams debugger
-        logging.info(
-            """
-                negative_sample: %d 
-                embed_size: %d
-                window_size: %d
-                max_gradient_norm: %f
-                init_learning_rate: %f
-                L2_lambda: %f
-                net_struct: %s
-                similarity_func: %s
-                query_weight: %s
-            """%(self.negative_sample,
-                 self.embed_size,
-                 self.window_size,
-                 self.max_gradient_norm,
-                 self.init_learning_rate,
-                 self.L2_lambda,
-                 self.net_struct,
-                 self.similarity_func,
-                 self.query_weight)
-        )
 
         # create placeholders
         self._create_placeholder()
@@ -128,7 +89,7 @@ class HEM():
                 self.product_scores = LSE.get_product_scores(self, self.query_word_idxs)
             else:
                 self.product_scores = HEM_builder.get_product_scores(self, self.user_idxs, self.query_word_idxs)
-        
+
         # Add tf.summary scalar
         tf.summary.scalar('Learning_rate', self.learning_rate, collections=['train'])
         tf.summary.scalar('Loss', self.loss, collections=['train'])

@@ -15,15 +15,13 @@ import sys
 import time
 
 import numpy as np
-from six.moves import xrange    # pylint: disable=redefined-builtin
 import tensorflow.compat.v1 as tf
 import yaml
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from product_embedding_zoo import utils
-from product_embedding_zoo import input_feed
-import product_embedding_zoo as pez
-from product_embedding_zoo.utils.param import Param
+from esrt import input_feed, utils
+from esrt.engine.param_table import ParamTable
+
 
 
 tf.app.flags.DEFINE_boolean("decode", False,
@@ -41,6 +39,7 @@ def create_model(session, model_name, hparams, forward_only, data_set, model_dir
     """Create translation model and initialize or load parameters in session."""
     print("Create a learning model %s"%model_name)
     model = utils.find_class(model_name)(data_set, hparams, forward_only)
+    model.build()
     print("reading ckpt file from ", model_dir)
     ckpt = tf.train.get_checkpoint_state(model_dir)
     if ckpt:
@@ -59,22 +58,19 @@ def train():
     # parse exp settings file
     aparams, dparams, eparams, hparams = _parse_exp_settings(FLAGS.setting_file)
 
-    # Hack the file path  when use python -m test.main
-    #data_dir = os.path.join(os.path.dirname(__file__), '..', dparams.data_dir)
-    #input_train_dir = os.path.join(os.path.dirname(__file__), '..', dparams.input_train_dir)
-    data_dir = dparams.data_dir
-    input_train_dir = dparams.input_train_dir 
+    data_dir = dparams['data_dir']
+    input_train_dir = dparams['input_train_dir']
 
     # Prepare data.
     print("Reading data in %s" % data_dir)
 
     # get module(arch) name  information
-    dataset_str = aparams.dataset_type
-    input_feed_str = aparams.input_feed
-    model_str = aparams.learning_algorithm
+    dataset_str = aparams['dataset_type']
+    input_feed_str = aparams['input_feed']
+    model_str = aparams['learning_algorithm']
 
     data_set = utils.find_class(dataset_str)(data_dir, input_train_dir, 'train')
-    data_set.sub_sampling(eparams.subsampling_rate)
+    data_set.sub_sampling(eparams['subsampling_rate'])
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -82,21 +78,20 @@ def train():
     with tf.Session(config=config) as sess:
         # Create model.
         print("Creating model")
-        model = create_model(sess, model_str, hparams, False, data_set, dparams.model_dir)
+        model = create_model(sess, model_str, hparams, False, data_set, dparams['model_dir'])
         print("Create a input feed module %s"%input_feed_str)
-        input_feed = utils.find_class(input_feed_str)(model, hparams.batch_size)
+        input_feed = utils.find_class(input_feed_str)(model, hparams['batch_size'])
         compat_input_feed = CompatInputFeed(input_feed)
 
-        train_writer = tf.summary.FileWriter(dparams.logging_dir, sess.graph)
         print('Start training')
-        words_to_train = float(eparams.max_train_epoch * data_set.word_count) + 1
+        words_to_train = float(eparams['max_train_epoch'] * data_set.word_count) + 1
         previous_words = 0.0
         start_time = time.time()
         step_time, loss = 0.0, 0.0
         current_epoch = 0
         current_step = 0
         get_batch_time = 0.0
-        training_seq = [i for i in xrange(data_set.review_size)]
+        training_seq = [i for i in range(data_set.review_size)]
         input_feed.setup_data_set(data_set, words_to_train)
         while True:
             random.shuffle(training_seq)
@@ -107,26 +102,20 @@ def train():
                 batch_input_feed, has_next = input_feed.get_train_batch(debug=False)
                 get_batch_time += time.time() - time_flag
 
-                # output params
-                #word_idxs = batch_input_feed[model.word_idxs.name]
-                #learning_rate = batch_input_feed[model.learning_rate.name]
                 word_idxs = compat_input_feed.word_idxs(batch_input_feed, model)
                 learning_rate = compat_input_feed.learning_rate(batch_input_feed, model)
 
                 if len(word_idxs) > 0:
                     time_flag = time.time()
-                    step_loss, summary = model.step(sess, batch_input_feed, False, file_writer=train_writer)
-                    #train_writer.add_run_metadata(run_metadata, global_step=self.global_stepi)
-                    #print("The summaries are: ", summary)
-                    train_writer.add_summary(summary, model.global_step.eval())
+                    step_loss = model.step(sess, batch_input_feed, False)
                     #step_time += (time.time() - start_time) / FLAGS.steps_per_checkpoint
-                    loss += step_loss / eparams.steps_per_checkpoint
+                    loss += step_loss / eparams['steps_per_checkpoint']
                     current_step += 1
                     #print(step_loss)
                     step_time += time.time() - time_flag
 
                 # Once in a while, we print statistics.
-                if current_step % eparams.steps_per_checkpoint == 0:
+                if current_step % eparams['steps_per_checkpoint'] == 0:
                     print("Epoch %d Words %d/%d: lr = %5.3f loss = %6.2f words/sec = %5.2f prepare_time %.2f step_time %.2f\r" %
                             (current_epoch, input_feed.finished_word_num, input_feed.words_to_train, learning_rate, loss,
                                 (input_feed.finished_word_num- previous_words)/(time.time() - start_time), get_batch_time, step_time), end="")
@@ -136,20 +125,15 @@ def train():
                     sys.stdout.flush()
                     previous_words = input_feed.finished_word_num
                     start_time = time.time()
-                    #print('time: ' + str(time.time() - last_check_point_time))
-                    #if time.time() - last_check_point_time > FLAGS.seconds_per_checkpoint:
-                    #    checkpoint_path_best = os.path.join(FLAGS.train_dir, "ProductSearchEmbedding.ckpt")
-                    #    model.saver.save(sess, checkpoint_path_best, global_step=model.global_step)
 
             current_epoch += 1
-            if not os.path.exists(dparams.model_dir):
-                os.mkdir(dparams.model_dir)
-            checkpoint_path_best = os.path.join(dparams.model_dir, "ProductSearchEmbedding.ckpt")
+            if not os.path.exists(dparams['model_dir']):
+                os.mkdir(dparams['model_dir'])
+            checkpoint_path_best = os.path.join(dparams['model_dir'], "ProductSearchEmbedding.ckpt")
             model.saver.save(sess, checkpoint_path_best, global_step=model.global_step)
-            if current_epoch >= eparams.max_train_epoch:
+            if current_epoch >= eparams['max_train_epoch']:
                 break
-        checkpoint_path_best = os.path.join(dparams.model_dir, "ProductSearchEmbedding.ckpt")
-        #logging.INFO("The checkpoint best path is in:  %s"%(checkpoint_path_best))
+        checkpoint_path_best = os.path.join(dparams['model_dir'], "ProductSearchEmbedding.ckpt")
         model.saver.save(sess, checkpoint_path_best, global_step=model.global_step)
 
 
@@ -157,19 +141,16 @@ def get_product_scores():
     # parse exp settings file
     aparams, dparams, eparams, hparams = _parse_exp_settings(FLAGS.setting_file)
 
-    # Hack the file path  when use python -m test.main
-    #data_dir = os.path.join(os.path.dirname(__file__), '..', dparams.data_dir)
-    #input_train_dir = os.path.join(os.path.dirname(__file__), '..', dparams.input_train_dir)
-    data_dir = dparams.data_dir
-    input_train_dir = dparams.input_train_dir
+    data_dir = dparams['data_dir']
+    input_train_dir = dparams['input_train_dir']
 
     # read data
     print("Reading data in %s" % data_dir)
 
     # get module(arch) name  information
-    dataset_str = aparams.dataset_type
-    input_feed_str = aparams.input_feed
-    model_str = aparams.learning_algorithm
+    dataset_str = aparams['dataset_type']
+    input_feed_str = aparams['input_feed']
+    model_str = aparams['learning_algorithm']
 
     # create dataset object
     data_set = utils.find_class(dataset_str)(data_dir, input_train_dir, 'test')
@@ -180,13 +161,13 @@ def get_product_scores():
     with tf.Session(config=config) as sess:
         # Create model.
         print("Read model")
-        model = create_model(sess,  model_str, hparams, True, data_set, dparams.model_dir)
-        input_feed= utils.find_class(input_feed_str)(model, hparams.batch_size)
+        model = create_model(sess,  model_str, hparams, True, data_set, dparams['model_dir'])
+        input_feed= utils.find_class(input_feed_str)(model, hparams['batch_size'])
         user_ranklist_map = {}
         user_ranklist_score_map = {}
         print('Start Testing')
-        words_to_train = float(eparams.max_train_epoch * data_set.word_count) + 1
-        test_seq = [i for i in xrange(data_set.review_size)]
+        words_to_train = float(eparams['max_train_epoch'] * data_set.word_count) + 1
+        test_seq = [i for i in range(data_set.review_size)]
         input_feed.setup_data_set(data_set, words_to_train)
         input_feed.intialize_epoch(test_seq)
         input_feed.prepare_test_epoch(debug=True)
@@ -203,20 +184,19 @@ def get_product_scores():
             for uidx in range(len(user_product_scores)):
                 if uidx > 10:
                     break
-                print(user_product_scores[uidx][0:10])
 
             # record the results
-            for i in xrange(len(uqr_pairs)):
+            for i in range(len(uqr_pairs)):
                 u_idx, p_idx, q_idx, r_idx = uqr_pairs[i]
                 sorted_product_idxs = sorted(range(len(user_product_scores[i])),
                                     key=lambda k: user_product_scores[i][k], reverse=True)
                 user_ranklist_map[(u_idx, q_idx)],user_ranklist_score_map[(u_idx, q_idx)] = data_set.compute_test_product_ranklist(u_idx,
-                                                user_product_scores[i], sorted_product_idxs, eparams.rank_cutoff) #(product name, rank)
-            if current_step % eparams.steps_per_checkpoint == 0:
+                                                user_product_scores[i], sorted_product_idxs, eparams['rank_cutoff']) #(product name, rank)
+            if current_step % eparams['steps_per_checkpoint']== 0:
                 print("Finish test review %d/%d\r" %
                         (input_feed.cur_uqr_i, len(input_feed.test_seq)), end="")
 
-    data_set.output_ranklist(user_ranklist_map, user_ranklist_score_map, dparams.model_dir, hparams.similarity_func, debug=True)
+    data_set.output_ranklist(user_ranklist_map, user_ranklist_score_map, dparams['model_dir'], hparams['similarity_func'], debug=True)
     return
 
 def output_embedding(exp_settings):
@@ -249,7 +229,7 @@ def output_embedding(exp_settings):
         user_ranklist_map = {}
         print('Start Testing')
         words_to_train = float(eparams.max_train_epoch * data_set.word_count) + 1
-        test_seq = [i for i in xrange(data_set.review_size)]
+        test_seq = [i for i in range(data_set.review_size)]
         input_feed.setup_data_set(data_set, words_to_train)
         input_feed.intialize_epoch(test_seq)
         input_feed.prepare_test_epoch()
@@ -270,13 +250,15 @@ def output_embedding(exp_settings):
     return
 
 def _parse_exp_settings(settings_file):
-    params = Param(settings_file)
-    aparams, dparams, eparams, hparams = params.arch, params.data, params.experiment, params.hparams
-    # debug
-    print("The arch params are: ", aparams)
-    print("The dparams are: ", dparams)
-    print("The eparams are: ", eparams)
-    print("The hparams are: ", hparams)
+    hparams = ParamTable()
+    hparams.update_from_yaml(settings_file)
+
+    with open(settings_file, 'r') as f:
+        tdict = yaml.load(f, Loader=yaml.SafeLoader)
+        aparams = tdict['arch']
+        dparams = tdict['data']
+        eparams = tdict['experiment']
+
     return aparams, dparams, eparams, hparams
 
 def main(_):
