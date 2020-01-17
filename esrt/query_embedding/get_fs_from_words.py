@@ -3,7 +3,7 @@
 import tensorflow.compat.v1 as tf
 from tensorflow.python.ops import variable_scope
 
-def get_fs_from_words(model, word_idxs, reuse, scope=None):
+def get_fs_from_words(model, word_idxs, word_emb, reuse, scope=None):
     """
     Get the embedding from word_idxs.
 
@@ -24,7 +24,7 @@ def get_fs_from_words(model, word_idxs, reuse, scope=None):
     with variable_scope.variable_scope(scope or 'f_s_abstraction',
      reuse=reuse):
     # get mean word vectors
-        word_vecs = tf.nn.embedding_lookup(model.word_emb, word_idxs)
+        word_vecs = tf.nn.embedding_lookup(word_emb, word_idxs)
         mean_word_vec = tf.reduce_mean(word_vecs, 1)
         # get f(s)
         f_W = variable_scope.get_variable("f_W", [model.embed_size, model.embed_size])

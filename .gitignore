@@ -4,7 +4,8 @@
 *.swp
 # ignore *_log file and *_tmp
 *_log/
-*_tmp/
+*_tmp*/
+*/.DS_Store
 
 # ignore dataset
 amazon_cellphone_index_dataset/

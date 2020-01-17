@@ -3,7 +3,7 @@ from tensorflow.python.ops import array_ops
 
 from esrt.losses import nce_loss
 
-def pair_search_loss(model, query_vec, example_idxs, example_emb, label_idxs, label_emb,
+def pair_search_loss(model, add_weight, query_vec, example_idxs, example_emb, label_idxs, label_emb,
                     label_bias, label_size, label_distribution):
     """
     Args:
@@ -18,7 +18,7 @@ def pair_search_loss(model, query_vec, example_idxs, example_emb, label_idxs, la
         label_distribution: A list with type of float32
 
     Return:
-        loss: Tensor with float32
+        loss_tensor: Tensor with shape of [batch_size, 1] with type of float32.
     """
     batch_size = array_ops.shape(example_idxs)[0]#get batch_size
     # Nodes to compute the nce loss w/ candidate sampling.
@@ -35,7 +35,7 @@ def pair_search_loss(model, query_vec, example_idxs, example_emb, label_idxs, la
             unigrams=label_distribution))
 
     #get example embeddings [batch_size, embed_size]
-    example_vec = tf.nn.embedding_lookup(example_emb, example_idxs) * (1-model.Wu) + query_vec * model.Wu
+    example_vec = tf.nn.embedding_lookup(example_emb, example_idxs) * (1-add_weight) + query_vec * add_weight
 
     #get label embeddings and bias [batch_size, embed_size], [batch_size, 1]
     true_w = tf.nn.embedding_lookup(label_emb, label_idxs)

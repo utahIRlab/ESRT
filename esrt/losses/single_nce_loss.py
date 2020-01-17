@@ -18,7 +18,7 @@ def single_nce_loss(model, example_idxs, example_emb, label_idxs, label_emb,
         label_distribution: A list with type of float32
 
     Return:
-        loss: Tensor with float32
+        loss_tensor: Tensor with shape of [batch_size, 1] with type of float32.
     """
     batch_size = array_ops.shape(example_idxs)[0]#get batch_size
     # Nodes to compute the nce loss w/ candidate sampling.

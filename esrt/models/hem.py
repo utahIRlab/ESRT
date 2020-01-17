@@ -1,5 +1,3 @@
-
-
 import tensorflow.compat.v1 as tf
 from tensorflow.python.ops import variable_scope
 from tensorflow.python.ops import array_ops
@@ -87,21 +85,21 @@ class HEM(BaseModel):
             regularization_terms = []
 
             # predict words loss
-            uw_loss, uw_embs = single_nce_loss(self, self.user_idxs, self.user_emb, self.word_idxs, self.word_emb,
+            uw_loss_tensor, uw_embs = single_nce_loss(self, self.user_idxs, self.user_emb, self.word_idxs, self.word_emb,
                             self.word_bias, self.vocab_size, self.vocab_distribute)
-            pw_loss, pw_embs = single_nce_loss(self, self.product_idxs, self.product_emb, self.word_idxs, self.word_emb,
+            pw_loss_tensor, pw_embs = single_nce_loss(self, self.product_idxs, self.product_emb, self.word_idxs, self.word_emb,
                             self.word_bias, self.vocab_size, self.vocab_distribute)
-            loss = uw_loss + pw_loss
+            loss = tf.reduce_sum(uw_loss_tensor + pw_loss_tensor)
             regularization_terms += uw_embs + pw_embs
 
             # pair search loss
-            query_vec, qw_embs = get_query_embedding(self, self.query_word_idxs, None)
+            query_vec, qw_embs = get_query_embedding(self, self.query_word_idxs, self.word_emb, None)
             regularization_terms += qw_embs
 
-            uqr_loss, uqr_embs = pair_search_loss(self, query_vec, self.user_idxs, self.user_emb, self.product_idxs, self.product_emb,
+            uqr_loss_tensor, uqr_embs = pair_search_loss(self, self.Wu, query_vec, self.user_idxs, self.user_emb, self.product_idxs, self.product_emb,
                                 self.product_bias, self.product_size, self.product_distribute)
             regularization_terms += uqr_embs
-            loss += uqr_loss
+            loss += tf.reduce_sum(uqr_loss_tensor)
 
             # regulaizer loss
             if self.L2_lambda > 0:
@@ -161,7 +159,7 @@ class HEM(BaseModel):
             # get user embedding [None, embed_size]
             user_vec = tf.nn.embedding_lookup(self.user_emb, user_idxs)
             # get query embedding [None, embed_size]
-            query_vec, query_embs = get_query_embedding(self, query_word_idx, True)
+            query_vec, query_embs = get_query_embedding(self, query_word_idx, self.word_emb, True)
 
             # get candidate product embedding [None, embed_size]
             product_vec = None
