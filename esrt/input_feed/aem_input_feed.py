@@ -2,12 +2,12 @@ from __future__ import print_function
 
 import random
 
-# 3rd import
 import numpy as np
-from six.moves import xrange
+
+from esrt.engine.base_input_feed import BaseInputFeed
 
 
-class AEMInputFeed(object):
+class AEMInputFeed(BaseInputFeed):
     def __init__(self, model, batch_size):
         self.model = model
         self.batch_size = batch_size
@@ -96,7 +96,7 @@ class AEMInputFeed(object):
     def prepare_test_epoch(self,debug=False):
         self.test_user_query_set = set()
         self.test_seq = []
-        for review_idx in xrange(len(self.data_set.review_info)):
+        for review_idx in range(len(self.data_set.review_info)):
             user_idx = self.data_set.review_info[review_idx][0]
             product_idx = self.data_set.review_info[review_idx][1]
             for query_idx in self.data_set.product_query_idx[product_idx]:
@@ -153,7 +153,7 @@ class AEMInputFeed(object):
         input_feed[self.model.query_word_idxs.name] = query_word_idxs
         input_feed[self.model.review_idxs.name] = review_idxs
         input_feed[self.model.word_idxs.name] = word_idxs
-    
+
         if debug:
             print("This is a test batch")
         return input_feed, has_next, self.test_seq[start_i:self.cur_uqr_i]

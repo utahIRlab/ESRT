@@ -291,6 +291,8 @@ class CompatInputFeed():
         elif isinstance(self.input_feed, input_feed.DREMInputFeed):
             #print("the current input feed is %s"%str(input_feed.DREMInputFeed))
             return batch_input_feed[model.relation_dict['word']['idxs'].name]
+        elif isinstance(self.input_feed, input_feed.ZAMInputFeed):
+            return batch_input_feed[model.word_idxs.name]
         else:
             raise ValueError("The input feed class %s is not defined"%str(self.input_feed))
     def learning_rate(self,batch_input_feed, model):
@@ -299,6 +301,8 @@ class CompatInputFeed():
         if isinstance(self.input_feed, input_feed.AEMInputFeed):
             return batch_input_feed[model.learning_rate.name]
         elif isinstance(self.input_feed, input_feed.DREMInputFeed):
+            return batch_input_feed[model.learning_rate.name]
+        if isinstance(self.input_feed, input_feed.ZAMInputFeed):
             return batch_input_feed[model.learning_rate.name]
         else:
             raise ValueError("The input feed class %s is not defined"%str(self.input_feed))

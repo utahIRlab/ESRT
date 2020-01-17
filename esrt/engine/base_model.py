@@ -37,7 +37,7 @@ class BaseModel(abc.ABC):
     @abc.abstractmethod
     def _build_placeholder(self):
         """Define all placeholders the model needs, each sub class need to
-            implement this private class."""
+            implement this private method."""
     @abc.abstractmethod
     def _build_embedding_graph_and_loss(self, scope=None):
         """Define the computation graph, and output a tf.Tensor loss,
