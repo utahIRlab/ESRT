@@ -1,7 +1,7 @@
 arch:
-  input_feed: "product_embedding_zoo.input_feed.AEMInputFeed"
-  learning_algorithm: "product_embedding_zoo.learning_algorithm.AEM"
-  dataset_type: "product_embedding_zoo.dataset.AEMDataset"
+  input_feed: "esrt.input_feed.AEMInputFeed"
+  learning_algorithm: "esrt.models.AEM"
+  dataset_type: "esrt.dataset.AEMDataset"
 data:
   data_dir: "./amazon_cellphone_index_dataset/seq_min_count5/"
   input_train_dir: "./amazon_cellphone_index_dataset/seq_min_count5/seq_query_split/"

@@ -50,13 +50,7 @@ class AEMInputFeed(object):
                 query_word_idxs.append(self.data_set.query_words[query_idx])
                 review_idxs.append(review_idx)
                 word_idxs.append(text_list[self.cur_word_i])
-                if self.model.need_context:
-                    i = self.cur_word_i
-                    start_index = i - self.model.window_size if i - self.model.window_size > 0 else 0
-                    context_word_list = text_list[start_index:i] + text_list[i+1:i+self.model.window_size+1]
-                    while len(context_word_list) < 2 * self.model.window_size:
-                        context_word_list += text_list[start_index:start_index+2*self.model.window_size-len(context_word_list)]
-                    context_word_idxs.append(context_word_list)
+
 
             #move to the next
             self.cur_word_i += 1
@@ -73,13 +67,7 @@ class AEMInputFeed(object):
                 text_list = self.data_set.review_text[review_idx]
                 text_length = len(text_list)
 
-        batch_context_word_idxs = None
-        length = len(word_idxs)
-        if self.model.need_context:
-            batch_context_word_idxs = []
-            for length_idx in xrange(2 * self.model.window_size):
-                batch_context_word_idxs.append(np.array([context_word_idxs[batch_idx][length_idx]
-                        for batch_idx in xrange(length)], dtype=np.int64))
+
 
         has_next = False if self.cur_review_i == self.review_size else True
 
@@ -93,9 +81,7 @@ class AEMInputFeed(object):
         input_feed[self.model.query_word_idxs.name] = query_word_idxs
         input_feed[self.model.review_idxs.name] = review_idxs
         input_feed[self.model.word_idxs.name] = word_idxs
-        if batch_context_word_idxs != None:
-            for i in xrange(2 * self.model.window_size):
-                input_feed[self.model.context_word_idxs[i].name] = batch_context_word_idxs[i]
+
 
         if debug:
             for i in range(len(product_idxs)):
@@ -149,27 +135,12 @@ class AEMInputFeed(object):
             query_word_idxs.append(self.data_set.query_words[query_idx])
             review_idxs.append(review_idx)
             word_idxs.append(text_list[0])
-            if self.model.need_context:
-                i = 0
-                start_index = i - self.model.window_size if i - self.model.window_size > 0 else 0
-                context_word_list = text_list[start_index:i] + text_list[i+1:i+self.model.window_size+1]
-                while len(context_word_list) < 2 * self.model.window_size:
-                    context_word_list += text_list[start_index:start_index+2*self.model.window_size-len(context_word_list)]
-                context_word_idxs.append(context_word_list)
 
             #move to the next review
             self.cur_uqr_i += 1
             if self.cur_uqr_i == len(self.test_seq):
                 break
             user_idx, product_idx, query_idx, review_idx = self.test_seq[self.cur_uqr_i]
-
-        batch_context_word_idxs = None
-        length = len(word_idxs)
-        if self.model.need_context:
-            batch_context_word_idxs = []
-            for length_idx in xrange(2 * self.model.window_size):
-                batch_context_word_idxs.append(np.array([context_word_idxs[batch_idx][length_idx]
-                        for batch_idx in xrange(length)], dtype=np.int64))
 
         has_next = False if self.cur_uqr_i == len(self.test_seq) else True
         # create input feed
@@ -182,9 +153,7 @@ class AEMInputFeed(object):
         input_feed[self.model.query_word_idxs.name] = query_word_idxs
         input_feed[self.model.review_idxs.name] = review_idxs
         input_feed[self.model.word_idxs.name] = word_idxs
-        if batch_context_word_idxs != None:
-            for i in xrange(2 * self.model.window_size):
-                input_feed[self.model.context_word_idxs[i].name] = batch_context_word_idxs[i]
+    
         if debug:
             print("This is a test batch")
         return input_feed, has_next, self.test_seq[start_i:self.cur_uqr_i]

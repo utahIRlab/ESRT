@@ -33,7 +33,7 @@ def get_product_scores(model, user_idxs, query_word_idx, product_idxs = None, sc
         # get query embedding [None, embed_size]
         query_vec, query_embs = get_query_embedding(model, query_word_idx, True)
         user_vec, _ = get_user_vec(model, query_vec, True)
-        
+
         # get candidate product embedding [None, embed_size]
         product_vec = None
         product_bias = None
@@ -138,19 +138,7 @@ def build_embedding_graph_and_loss(model, scope = None):
         model.product_emb =    tf.Variable( tf.zeros([model.product_size+1, model.embed_size]),
                             name="product_emb")
         model.product_bias =    tf.Variable( tf.zeros([model.product_size+1]), name="product_b")
-        # Review embeddings.
-        if model.need_review:
-            model.review_emb = tf.Variable( tf.zeros([model.review_size, model.embed_size]),
-                                name="review_emb")
-            model.review_bias = tf.Variable(tf.zeros([model.review_size]), name="review_b")
 
-        if model.need_context:
-            # Context embeddings.
-            model.context_emb = tf.Variable( tf.zeros([model.vocab_size, model.embed_size]),
-                                name="context_emb")
-            model.context_bias = tf.Variable(tf.zeros([model.vocab_size]), name="context_b")
-            return UQP_nce_loss(model, model.user_idxs, model.query_word_idxs, model.product_idxs, model.review_idxs,
-                                        model.word_idxs, model.context_word_idxs)
 
         loss = None
         regularization_terms = []
@@ -185,8 +173,7 @@ def build_embedding_graph_and_loss(model, scope = None):
             loss += model.L2_lambda * l2_loss
 
         batch_size = array_ops.shape(model.word_idxs)[0]  #get batch_size
-        #model.print_ops.append(tf.print("total_loss: ", loss, output_stream=sys.stdout))
-        #model.print_ops.append(tf.print("batch size: ", batch_size, output_stream=sys.stdout))
+    
         return loss / math_ops.cast(batch_size, dtypes.float32)
 
 def get_user_vec(model, query_vec, reuse=False, scope=None):

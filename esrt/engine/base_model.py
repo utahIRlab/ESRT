@@ -25,6 +25,11 @@ class BaseModel(abc.ABC):
     def params(self, new_params: ParamTable):
         self._params = new_params
 
+    @property
+    def dataset(self):
+        return self._dataset
+
+
     @abc.abstractmethod
     def build(self):
         """Build the model, each sub class need to implement this method."""
